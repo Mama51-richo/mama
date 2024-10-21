@@ -1,0 +1,77 @@
+# Import necessary libraries
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up some constants
+WIDTH, HEIGHT = 800, 600
+PLAYER_CAR_SIZE = 50
+OPPONENT_CAR_SIZE = 50
+PLAYER_CAR_SPEED = 5
+OPPONENT_CAR_SPEED = 3
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+
+# Set up the display
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+# Set up the font
+font = pygame.font.Font(None, 36)
+
+# Set up the player car
+player_car = pygame.Rect(WIDTH / 2, HEIGHT - PLAYER_CAR_SIZE, PLAYER_CAR_SIZE, PLAYER_CAR_SIZE)
+
+# Set up the opponent cars
+opponent_cars = [pygame.Rect(random.randint(0, WIDTH - OPPONENT_CAR_SIZE), random.randint(-HEIGHT, 0), OPPONENT_CAR_SIZE, OPPONENT_CAR_SIZE) for _ in range(10)]
+
+# Set up the score
+score = 0
+
+# Game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Move the player car
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and player_car.left > 0:
+        player_car.x -= PLAYER_CAR_SPEED
+    if keys[pygame.K_RIGHT] and player_car.right < WIDTH:
+        player_car.x += PLAYER_CAR_SPEED
+
+    # Move the opponent cars
+    for opponent_car in opponent_cars:
+        opponent_car.y += OPPONENT_CAR_SPEED
+        if opponent_car.y > HEIGHT:
+            opponent_car.y = random.randint(-HEIGHT, 0)
+            opponent_car.x = random.randint(0, WIDTH - OPPONENT_CAR_SIZE)
+
+    # Check for collisions
+    for opponent_car in opponent_cars:
+        if player_car.colliderect(opponent_car):
+            print("Game Over! Your score was:", score)
+            pygame.quit()
+            sys.exit()
+
+    # Increase the score
+    score += 1
+
+    # Draw everything
+    screen.fill(WHITE)
+    pygame.draw.rect(screen, RED, player_car)
+    for opponent_car in opponent_cars:
+        pygame.draw.rect(screen, BLUE, opponent_car)
+    text = font.render("Score: " + str(score), True, (0, 0, 0))
+    screen.blit(text, (10, 10))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    pygame.time.Clock().tick(60)
